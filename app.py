@@ -1,4 +1,4 @@
-from flask import Flask,make_response,render_template,jsonify,request
+from flask import Flask,make_response,render_template,jsonify,request,session
 from flask_mongoengine import MongoEngine
 
 
@@ -21,14 +21,49 @@ class Bike(mydb.Document):
     year=mydb.IntField()
     cc=mydb.FloatField()
     price=mydb.IntField()
-    
-@app.route("/<reg>")
+
+#ERASE 
+@app.route("/erase/<reg>",methods=['DELETE'])
+def deleting(reg):
+    check=Bike.objects(regno=reg).first()
+    check.delete()
+    return jsonify(reg+"vehicle has deleted")
+
+# update method
+@app.route("/<reg>",methods=['GET','PUT'])
 def getByRegno(reg):
-    return jsonify(Bike.objects(regno=reg).first())
+    if request.method=="GET":
+        one=Bike.objects(regno=reg).first()
+        return jsonify(one)
+    else:
+        hai=request.json
+        Bike.objects(regno=reg).update_one(set__brand=hai['brand'],set__model=hai['model'],set__cc=hai['cc'],set__price=hai['price'],set__year=hai['year'])
+        return jsonify(Bike.objects(regno=reg))
+
+
+@app.route("/budget/<int:cost>")
+def getByPrice(cost):
+    return jsonify(Bike.objects(price__lte=cost))
+
+@app.route("/brand/<bnd>")
+def getByBrand(bnd):
+    return jsonify(Bike.objects(brand=bnd))
 
 
 
-@app.route("/",methods=['POST'])
+@app.route("/year/<int:yr>")
+def getByYear(yr):
+    return jsonify(Bike.objects(year__gte=yr))
+
+
+# @app.route("/<reg>")
+# def getByRegno(reg):
+#     return jsonify(Bike.objects(regno=reg).first())
+
+
+
+
+@app.route("/create",methods=['POST'])
 def addnew():
     hai=request.json
     bike=Bike()
