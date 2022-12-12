@@ -1,5 +1,6 @@
 from flask import Flask,make_response,render_template,jsonify,request,session
 from flask_mongoengine import MongoEngine
+from flask_cors import CORS
 
 
 app=Flask(__name__)
@@ -12,6 +13,9 @@ app.config['MONGODB_HOST']="mongodb+srv://mohan:mohan@cluster0.traigro.mongodb.n
 
 mydb=MongoEngine()
 mydb.init_app(app)
+
+CORS(app)
+
 
 
 class Bike(mydb.Document):
